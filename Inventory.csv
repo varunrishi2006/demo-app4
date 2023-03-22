@@ -1,4 +1,4 @@
-Market,NDO,Inventory Class,Load Factor,Period
+Route,NDO,Inventory Class,Load Factor,Period
 BOMDEL,0,R,20,Historical
 BOMDEL,8,R,20,Historical
 BOMDEL,15,R,20,Historical

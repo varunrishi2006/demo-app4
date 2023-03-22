@@ -1,4 +1,4 @@
-Market,NDO,Booked Historical,Current,Avg Fare (Historical),Current Fare,Total Rev (Historical),Current Revenue,Historical Booked (%),Current Booked (%)
+Route,NDO,Booked Historical,Current,Avg Fare (Historical),Current Fare,Total Rev (Historical),Current Revenue,Historical Booked (%),Current Booked (%)
 BOMDEL,0,180,,7890,,1420200,,100%,
 BOMDEL,1,180,,7890,,1420200,,100%,
 BOMDEL,2,180,,7890,,1420200,,100%,

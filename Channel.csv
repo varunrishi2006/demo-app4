@@ -1,4 +1,4 @@
-Market,NDO,Channel,Load Factor,Period
+Route,NDO,Channel,Load Factor,Period
 BOMDEL,0,Direct (Website & App),50,Historical
 BOMDEL,8,Direct (Website & App),44,Historical
 BOMDEL,15,Direct (Website & App),32,Historical

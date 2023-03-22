@@ -14,7 +14,7 @@ app = dash.Dash(
 )
 # app.title = "Forward Load Analytics Dashboard"
 
-columns = ['Market', 'Flight No.', 'Departure Time', 'Days-to-Departure', 'Forecast', 'Current Booked', 'Last 3 day Bookings']
+columns = ['Route', 'Flight No.', 'Departure Time', 'Days-to-Departure', 'Forecast', 'Current Booked', 'Last 3 day Bookings']
 
 df = pd.read_csv("C:/Users/varun/forward_load_analytics.csv")
 df_product = pd.read_csv("C:/Users/varun/Product.csv")
@@ -22,12 +22,6 @@ df_journey = pd.read_csv("C:/Users/varun/Journey.csv")
 df_channel = pd.read_csv("C:/Users/varun/Channel.csv")
 df_inventory = pd.read_csv("C:/Users/varun/Inventory.csv")
 df_booking_curve = pd.read_csv("C:/Users/varun/sample_data.csv")
-# df_product = pd.read_excel("C:/Users/varun/forward_load_analytics.xlsx", sheet_name="Product_1")
-#df_journey = pd.read_excel("C:/Users/varun/forward_load_analytics.xlsx", sheet_name="Journey")
-#df_channel = pd.read_excel("C:/Users/varun/forward_load_analytics.xlsx", sheet_name="Channel")
-#df_inventory = pd.read_excel("C:/Users/varun/forward_load_analytics.xlsx", sheet_name="Inventory")
-#df_booking_curve = pd.read_excel('C:/Users/varun/Desktop/Personal/SimplyOR/Sample_Data.xlsx', sheet_name='View1')
-
 
 # Code for initial preprocessing of booking curve dataframe starts here
 df_booking_curve['Total Rev (Historical)'] = df_booking_curve['Total Rev (Historical)'].astype(int)
@@ -88,7 +82,7 @@ day_list = [
     "Sunday",
 ]
 
-all_markets = df['Market'].unique().tolist()
+all_markets = df['Route'].unique().tolist()
 all_products = df['Product'].unique().tolist()
 all_journeys = df['Journey Type'].unique().tolist()
 
@@ -104,7 +98,7 @@ def description_card():
             html.H3("Welcome to the Forward Booked Load Insights Dashboard"),
             html.Div(
                 id="intro",
-                children="Explore insights related to forward booked load by Market, Days-to-departure (DTD), Days-of-Week and Time-of-days. Compare performance with the reference historical date range."
+                children="Explore insights related to forward booked load by Route, Days-to-departure (DTD), Days-of-Week and Time-of-days. Compare performance with the reference historical date range."
 
             ),
         ],
@@ -169,7 +163,7 @@ def generate_control_card():
             # ),
             html.Br(),
             html.P(),
-            html.P("Select Market"),
+            html.P("Select Route"),
             dcc.Dropdown(
                 id="market-select",
                 options=[{"label": i, "value": i} for i in all_markets],
@@ -188,7 +182,7 @@ def generate_control_card():
 
 
 def generate_filtered_dataframe(start, end, market):
-    filtered_df_init = df[(df["Market"].isin(market)) &
+    filtered_df_init = df[(df["Route"].isin(market)) &
                           (df['Departure Time'] >= start) &
                           (df['Departure Time'] <= end)]
     return filtered_df_init
@@ -212,7 +206,7 @@ def generate_departure_volume_heatmap(start, end, forecast_range, hm_click, mark
 
     if clickData is not None:
         market = clickData['points'][0]['customdata'][0]
-        filtered_df_init = df[(df["Market"] == market) &
+        filtered_df_init = df[(df["Route"] == market) &
                               (df['Departure Time'] >= start) &
                               (df['Departure Time'] <= end)]
     else:
@@ -394,7 +388,7 @@ app.layout = html.Div(
                                     className="mini_container",
                                 ),
                                 html.Div(
-                                    [html.H5(id="MarketText"), html.P("Critical Market")],
+                                    [html.H5(id="MarketText"), html.P("Critical Route")],
                                     id="obMarket",
                                     className="mini_container",
                                 ),
@@ -407,7 +401,7 @@ app.layout = html.Div(
                             id="departure_volume_card",
                             children=
                             [
-                                html.B("Revenue Opportunities (Yield/Load Critical) by Market and Departures"),
+                                html.B("Revenue Opportunities (Yield/Load Critical) by Route and Departures"),
                                 dcc.Graph(id="mkt_booking_trend")
                             ],
                             className="pretty_container",
@@ -546,7 +540,7 @@ def update_departure_summary(start, end, forecast_range, market):
     ob_ub_list = list()
     filtered_df_init = df[(df['Departure Time'] >= start) &
                           (df['Departure Time'] <= end) &
-                          (df["Market"].isin(market))]
+                          (df["Route"].isin(market))]
 
     # filtered_df_reg = filtered_df_init[(filtered_df_init['Forecast'] >= forecast_range[0]) &
     #                                    (filtered_df_init['Forecast'] <= forecast_range[1])]
@@ -567,12 +561,6 @@ def update_departure_summary(start, end, forecast_range, market):
     print(ob_ndo_range)
     ob_ndo_perc = round((ob_df['Departures'][0] / ob_departures) * 100)
     print(ob_ndo_perc)
-    # ob_mkt_df = filtered_df_ob.groupby('Market')['Departures'].sum().sort_values(ascending=False).reset_index()
-    # print(ob_mkt_df)
-    # ob_market = ob_mkt_df['Market'][0]
-    # print(ob_market)
-    # ob_market_perc = round((ob_mkt_df['Departures'][0] / ob_departures)*100)
-    # print(ob_market_perc)
 
     ub_departures = filtered_df_ub['Departures'].sum()
     print(ub_departures)
@@ -583,13 +571,9 @@ def update_departure_summary(start, end, forecast_range, market):
     print(ub_ndo_range)
     ub_ndo_perc = round((ub_df['Departures'][0] / ub_departures) * 100)
     print(ub_ndo_perc)
-    # ub_mkt_df = filtered_df_ub.groupby('Market')['Departures'].sum().sort_values(ascending=False).reset_index()
-    # ub_market = ub_mkt_df['Market'][0]
-    # print(ub_market)
-    # ub_market_perc = round((ub_mkt_df['Departures'][0] / ub_departures)*100)
-    # print(ub_market_perc)
-    df_imp_mkt_init = df_imp_mkt.groupby('Market')['Departures'].sum().sort_values(ascending=False).reset_index()
-    imp_mkt = df_imp_mkt_init['Market'][0]
+
+    df_imp_mkt_init = df_imp_mkt.groupby('Route')['Departures'].sum().sort_values(ascending=False).reset_index()
+    imp_mkt = df_imp_mkt_init['Route'][0]
     imp_mkt_perc = round(df_imp_mkt_init['Departures'][0] / total_departures * 100)
 
     ob_dep_detail = str(ob_departures) + " " + str("(") + str(ob_departures_perc) + str("%)")
@@ -600,10 +584,7 @@ def update_departure_summary(start, end, forecast_range, market):
     ob_ub_list.append(ob_ndo_detail)
     ub_ndo_detail = str(ub_ndo_range) + " " + str("(") + str(ub_ndo_perc) + str("%)")
     ob_ub_list.append(ub_ndo_detail)
-    # ob_market_detail = str(ob_market) + str("(") + str(ob_market_perc) + str("%)")
-    # ob_ub_list.append(ob_market_detail)
-    # ub_market_detail = str(ub_market) + str("(") + str(ub_market_perc) + str("%)")
-    # ob_ub_list.append(ub_market_detail)
+
     imp_mkt_detail = str(imp_mkt) + str("(") + str(imp_mkt_perc) + str("%)")
     ob_ub_list.append(imp_mkt_detail)
 
@@ -626,15 +607,15 @@ def update_dtd_booking_trend(start, end, forecast_range, market, clickData):
 
     if clickData is not None:
         market = clickData['points'][0]['customdata'][0]
-        filtered_df_init = df[(df["Market"] == market) &
+        filtered_df_init = df[(df["Route"] == market) &
                               (df['Departure Time'] >= start) &
                               (df['Departure Time'] <= end)]
     else:
         filtered_df_init = generate_filtered_dataframe(start, end, market)
 
     filtered_df_init['Departure_Status'] = filtered_df_init['Forecast'].apply(
-        lambda x: 'Yield Critical Departures' if x > forecast_range[1] else (
-            'Load Critical Departures' if x < forecast_range[0] else 'On-Track Departures'))
+        lambda x: 'Yield Critical' if x > forecast_range[1] else (
+            'Load Critical' if x < forecast_range[0] else 'On-Track'))
 
     filtered_df_1 = filtered_df_init.groupby(['NDO Range', 'Departure_Status'])['Departures'].sum().reset_index()
     filtered_df_2 = filtered_df_1.groupby('NDO Range')['Departures'].sum().reset_index()
@@ -645,6 +626,14 @@ def update_dtd_booking_trend(start, end, forecast_range, market, clickData):
     df_res_1.rename(columns={'Departure_Status': 'Departure Type', 'NDO Range':'Days-to-Departure Range'}, inplace=True)
 
     fig = px.bar(df_res_1, x='Days-to-Departure Range', y='Departures(%)', color='Departure Type', barmode='stack', text='Departures(%)', custom_data=['Departure Type'], template='ggplot2')
+    fig.update_layout(legend=dict(
+        orientation="h",
+        # entrywidth=90,
+        font=dict(size=12),
+        yanchor="bottom",
+        y=1.02,
+        xanchor="right",
+        x=0.9))
     return fig
 
 
@@ -667,7 +656,7 @@ def update_mkt_booking_trend(start, end, forecast_range, market):
     filtered_df_init = pd.concat([filtered_df_init,
                                   pd.get_dummies(filtered_df_init['Departure_Status'])], axis=1)
 
-    df_1 = filtered_df_init.groupby('Market').agg(
+    df_1 = filtered_df_init.groupby('Route').agg(
         {'High Forecast': 'sum', 'Low Forecast': sum, 'On-track': sum, 'Departures': 'sum'})
 
     df_1.reset_index(inplace=True)
@@ -676,7 +665,7 @@ def update_mkt_booking_trend(start, end, forecast_range, market):
     df_1['On-Track Departures (%)'] = round(df_1['On-track'] / df_1['Departures'] * 100, 1)
 
     fig = px.scatter(df_1, y="Yield Critical Departures (%)", x="Load Critical Departures (%)",
-                     size="Departures", color="Market", custom_data=["Market"], template='ggplot2')
+                     size="Departures", color="Route", custom_data=["Route"], template='ggplot2')
     # fig.update_layout(paper_bgcolor='rgba(0,0,0,0)')
     return fig
 
@@ -698,7 +687,7 @@ def update_flight_data_output(start, end, forecast_range, market, clickData, cli
     journey = ""
     if clickData is not None:
         market = clickData['points'][0]['customdata'][0]
-        filtered_df_init = df[(df["Market"] == market) &
+        filtered_df_init = df[(df["Route"] == market) &
                               (df['Departure Time'] >= start) &
                               (df['Departure Time'] <= end)]
     else:
@@ -727,7 +716,7 @@ def update_flight_data_output(start, end, forecast_range, market, clickData, cli
     filtered_df['Forecast'] = round(filtered_df['Forecast'], 0)
 
     filtered_df.rename(columns={'NDO': 'Days-to-Departure'}, inplace=True)
-    children.append(html.Div([
+    children=(html.Div([
         html.B("Departure Details"),
 
         dash_table.DataTable(
@@ -814,7 +803,7 @@ def updated_booking_curve(clickData, dimension):
 
     if clickData is not None:
         market = clickData['points'][0]['customdata'][0]
-        df_curve = df_booking_curve[df_booking_curve['Market'] == market]
+        df_curve = df_booking_curve[df_booking_curve['Route'] == market]
     else:
         df_curve = df_booking_curve.copy()
 
@@ -855,12 +844,21 @@ def updated_booking_curve(clickData, dimension):
 def product_performance(clickData):
     if clickData is not None:
         market = clickData['points'][0]['customdata'][0]
-        df_product_init = df_product[df_product['Market'] == market]
+        df_product_init = df_product[df_product['Route'] == market]
         df_product_final = df_product_init.groupby(['Product', 'NDO', 'Period'])['Load Factor'].sum().reset_index()
     else:
         df_product_final = df_product.groupby(['Product', 'NDO', 'Period'])['Load Factor'].sum().reset_index()
 
+    print(df_product_final)
     figure = px.area(df_product_final, x='NDO', y='Load Factor', color='Product', template='ggplot2', facet_row='Period', category_orders={'Period': ['Historical', 'Current']})
+    figure.update_layout(legend=dict(
+        orientation="h",
+        # entrywidth=90,
+        font=dict(size=12),
+        yanchor="bottom",
+        y=1.02,
+        xanchor="right",
+        x=0.8))
     return figure
 
 
@@ -871,12 +869,20 @@ def product_performance(clickData):
 def journey_performance(clickData):
     if clickData is not None:
         market = clickData['points'][0]['customdata'][0]
-        df_journey_init = df_journey[df_journey['Market'] == market]
+        df_journey_init = df_journey[df_journey['Route'] == market]
         df_journey_final = df_journey_init.groupby(['Journey', 'NDO', 'Period'])['Load Factor'].sum().reset_index()
     else:
         df_journey_final = df_journey.groupby(['Journey', 'NDO', 'Period'])['Load Factor'].sum().reset_index()
 
     figure = px.area(df_journey_final, x='NDO', y='Load Factor', color='Journey', template='ggplot2', facet_row='Period', category_orders={'Period': ['Historical', 'Current']})
+    figure.update_layout(legend=dict(
+        orientation="h",
+        # entrywidth=90,
+        font=dict(size=12),
+        yanchor="bottom",
+        y=1.02,
+        xanchor="right",
+        x=0.55))
     return figure
 
 
@@ -887,7 +893,7 @@ def journey_performance(clickData):
 def channel_performance(clickData):
     if clickData is not None:
         market = clickData['points'][0]['customdata'][0]
-        df_channel_init = df_channel[df_channel['Market'] == market]
+        df_channel_init = df_channel[df_channel['Route'] == market]
         df_channel_final = df_channel_init.groupby(['Channel', 'NDO', 'Period'])['Load Factor'].sum().reset_index()
     else:
         df_channel_final = df_channel.groupby(['Channel', 'NDO', 'Period'])['Load Factor'].sum().reset_index()
@@ -895,6 +901,14 @@ def channel_performance(clickData):
     print(f'Shape of df_channel_final is {df_channel_final.shape}')
     figure = px.area(df_channel_final, x='NDO', y='Load Factor', color='Channel', template='ggplot2',
                      facet_row='Period', category_orders={'Period': ['Historical', 'Current']})
+    figure.update_layout(legend=dict(
+        orientation="h",
+        # entrywidth=90,
+        font=dict(size=12),
+        yanchor="bottom",
+        y=1.02,
+        xanchor="right",
+        x=1.1))
     return figure
 
 
@@ -906,7 +920,7 @@ def journey_performance(clickData):
     print(f'check the value of clickData {clickData}')
     if clickData is not None:
         market = clickData['points'][0]['customdata'][0]
-        df_inventory_init = df_inventory[df_inventory['Market'] == market]
+        df_inventory_init = df_inventory[df_inventory['Route'] == market]
         df_inventory_final = df_inventory_init.groupby(['Inventory Class', 'NDO', 'Period'])[
             'Load Factor'].sum().reset_index()
     else:
@@ -918,6 +932,14 @@ def journey_performance(clickData):
                      facet_row='Period',
                      category_orders={'Period': ['Historical', 'Current'],
                                       'Inventory Class': ['R', 'Q', 'P', 'L', 'J', 'T', 'V', 'Y']})
+    figure.update_layout(legend=dict(
+        orientation="h",
+        # entrywidth=90,
+        font=dict(size=12),
+        yanchor="bottom",
+        y=1.02,
+        xanchor="right",
+        x=0.92))
     return figure
 
 
